@@ -41,6 +41,29 @@ def build_model(df):
     
     return model, accuracy
 
+# Function to make predictions based on user input
+def predict_survival(model):
+    # Get user input
+    st.subheader("Predict Survival for a New Passenger")
+    
+    pclass = st.selectbox('Class', [1, 2, 3])
+    age = st.slider('Age', 0, 100, 30)
+    fare = st.slider('Fare', 0, 500, 50)
+    sex = st.selectbox('Sex', ['male', 'female'])
+    
+    # Prepare input data for prediction
+    input_data = pd.DataFrame([[pclass, age, fare, sex]], columns=['Pclass', 'Age', 'Fare', 'Sex'])
+    input_data['Sex'] = input_data['Sex'].map({'male': 0, 'female': 1})
+    
+    # Predict survival
+    prediction = model.predict(input_data)[0]
+    
+    # Display result
+    if prediction == 1:
+        st.write("Predicted Survival: Survived")
+    else:
+        st.write("Predicted Survival: Not Survived")
+
 def main():
     # Load the data
     train_df = load_data()
@@ -72,7 +95,11 @@ def main():
     # Build the Logistic Regression model and show accuracy
     model, accuracy = build_model(train_df)
     st.write(f"Model Accuracy: {accuracy:.2f}")
+    
+    # Get prediction for a new passenger
+    predict_survival(model)
 
 if __name__ == "__main__":
     main()
+
 
