@@ -4,9 +4,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.impute import SimpleImputer
-import seaborn as sns
+import xgboost as xgb
 
 # Function to load the dataset
 @st.cache_data
@@ -14,9 +15,9 @@ def load_data():
     train_df = pd.read_csv('train.csv')
     return train_df
 
-# Function to build the Logistic Regression model
+# Function to build and return the model based on user's selection
 @st.cache_resource
-def build_model(df):
+def build_model(df, model_name):
     # Feature Engineering: Convert 'Sex' to numeric values
     df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
     
@@ -32,8 +33,15 @@ def build_model(df):
     # Split the data into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Train Logistic Regression Model
-    model = LogisticRegression(max_iter=500)
+    # Initialize the model based on user selection
+    if model_name == 'Logistic Regression':
+        model = LogisticRegression(max_iter=500)
+    elif model_name == 'Random Forest':
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+    elif model_name == 'XGBoost':
+        model = xgb.XGBClassifier(eval_metric='logloss', use_label_encoder=False)
+    
+    # Train the model
     model.fit(X_train, y_train)
     
     # Make predictions
@@ -106,9 +114,12 @@ def main():
     
     # Pass the figure to st.pyplot()
     st.pyplot(fig)
-
-    # Build the Logistic Regression model and show accuracy
-    model, accuracy, precision, recall, f1, conf_matrix = build_model(train_df)
+    
+    # Model selection
+    model_name = st.selectbox("Select Model", ['Logistic Regression', 'Random Forest', 'XGBoost'])
+    
+    # Build the selected model and show evaluation metrics
+    model, accuracy, precision, recall, f1, conf_matrix = build_model(train_df, model_name)
     
     # Display Model Evaluation Metrics
     st.write(f"Model Accuracy: {accuracy:.2f}")
@@ -124,5 +135,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
