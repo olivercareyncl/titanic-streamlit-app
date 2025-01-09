@@ -18,20 +18,6 @@ def data_overview(df):
     num_rows = st.slider("Number of rows to display", 5, 100, 10)
     st.write(df.head(num_rows))
 
-    # Column Information (Meta-data)
-    st.subheader("Column Information")
-    try:
-        column_info = pd.DataFrame({
-            'Data Type': df.dtypes,
-            'Missing Values': df.isnull().sum(),
-            'Unique Values': df.nunique(),
-            'Example Values': [df[col].dropna().unique()[:3] for col in df.columns]
-        })
-        # Display in a simplified format to avoid pyarrow issues
-        st.write(column_info)
-    except Exception as e:
-        st.write(f"Error displaying column information: {e}")
-
     # Missing Data Analysis
     st.subheader("Missing Data Analysis")
     missing_data = df.isnull().sum() / len(df) * 100  # Percentage of missing data
@@ -41,6 +27,20 @@ def data_overview(df):
         st.bar_chart(missing_data)
     else:
         st.write("No missing data")
+    
+    # Comment: Excluding rows with missing values for correlation calculation
+    # We will not fill the missing values, but we exclude rows with missing numerical data for the correlation heatmap.
+    df_no_missing = df.dropna(subset=['Age', 'Fare'])  # Only drop rows with missing 'Age' or 'Fare'
+
+    # Column Information (Meta-data)
+    st.subheader("Column Information")
+    column_info = pd.DataFrame({
+        'Data Type': df.dtypes,
+        'Missing Values': df.isnull().sum(),
+        'Unique Values': df.nunique(),
+        'Example Values': [df[col].dropna().unique()[:3] for col in df.columns]
+    })
+    st.write(column_info)
 
     # Summary Statistics
     st.subheader("Summary Statistics")
@@ -48,7 +48,7 @@ def data_overview(df):
 
     # Interactive Correlation Heatmap
     st.subheader("Correlation Heatmap")
-    corr = df.corr()
+    corr = df_no_missing.corr()  # Calculate correlation only on rows with no missing values
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
     st.pyplot(fig)
