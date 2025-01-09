@@ -85,7 +85,7 @@ def survival_analysis(df):
     """)
 
     # Exclude 'PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin' from the dropdown options
-    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin']]
+    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin', 'Age', 'Fare']]
 
     # Create Age and Fare groups
     df = create_age_groups(df)
@@ -147,5 +147,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
