@@ -70,8 +70,11 @@ def survival_analysis(df):
         The goal is to understand which factors had the most influence on whether a passenger survived or not.
     """)
 
+    # Exclude 'PassengerId', 'Survived', 'Name' from the dropdown options
+    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name']]
+
     # Select feature or combination of features to analyze
-    feature_column = st.selectbox("Select Feature to Analyze Against Survival", df.columns)
+    feature_column = st.selectbox("Select Feature to Analyze Against Survival", available_columns)
 
     if feature_column:
         # Plotting survival rate based on selected feature
@@ -83,8 +86,8 @@ def survival_analysis(df):
     # Investigating combinations of features
     st.subheader("Survival Rate by Feature Combinations")
     
-    feature1 = st.selectbox("Select First Feature", df.columns)
-    feature2 = st.selectbox("Select Second Feature", df.columns)
+    feature1 = st.selectbox("Select First Feature", available_columns)
+    feature2 = st.selectbox("Select Second Feature", available_columns)
 
     if feature1 and feature2:
         # Cross-tabulation and visualization for combinations of features
@@ -126,6 +129,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
