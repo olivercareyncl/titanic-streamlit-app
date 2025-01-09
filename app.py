@@ -3,10 +3,10 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier
 
 # Function to load the dataset
@@ -44,81 +44,17 @@ def encode_categorical_columns(df):
     
     return df
 
-# Enhanced Data Overview
-def data_overview(df):
-    st.header("Data Overview")
+# Function to handle missing values
+def handle_missing_values(df):
+    # Using SimpleImputer to fill missing values for numerical features
+    imputer_num = SimpleImputer(strategy='mean')  # Use mean for numerical columns
+    df[['Age', 'Fare']] = imputer_num.fit_transform(df[['Age', 'Fare']])
     
-    # Section 1: Dataset Overview
-    st.subheader("Dataset Overview")
-    st.write("""
-        This dataset contains information about passengers aboard the Titanic, including 
-        features such as their survival status, age, class, fare, and more. Understanding 
-        this data is crucial before proceeding to deeper analyses or predictive modeling.
-    """)
+    # Using SimpleImputer to fill missing values for categorical features
+    imputer_cat = SimpleImputer(strategy='most_frequent')  # Use most frequent (mode) for categorical columns
+    df[['Embarked']] = imputer_cat.fit_transform(df[['Embarked']])
     
-    st.write(f"Number of Rows: {df.shape[0]}")
-    st.write(f"Number of Columns: {df.shape[1]}")
-    
-    # Show data types in table format
-    data_types = pd.DataFrame({
-        'Column Name': df.columns,
-        'Data Type': df.dtypes
-    })
-    st.write(data_types)
-
-    # Feature Definitions
-    feature_definitions = {
-        'PassengerId': 'Unique ID assigned to each passenger.',
-        'Pclass': 'Passenger class (1 = 1st; 2 = 2nd; 3 = 3rd).',
-        'Name': 'Name of the passenger.',
-        'Sex': 'Gender of the passenger (male, female).',
-        'Age': 'Age of the passenger in years.',
-        'SibSp': 'Number of siblings or spouses aboard the Titanic.',
-        'Parch': 'Number of parents or children aboard the Titanic.',
-        'Ticket': 'Ticket number.',
-        'Fare': 'Fare paid by the passenger.',
-        'Cabin': 'Cabin number where the passenger stayed.',
-        'Embarked': 'Port of embarkation (C = Cherbourg; Q = Queenstown; S = Southampton).',
-        'Survived': 'Survival status (0 = No; 1 = Yes).',
-        'Age Group': 'Categorized age group (Infant, Child, Teen, Adult, Senior, Elderly).',
-        'Fare Group': 'Categorized fare group (Low Fare, Medium Fare, High Fare, Very High Fare).'
-    }
-
-    # Section 2: Feature Definitions
-    st.subheader("Feature Definitions")
-    for column, definition in feature_definitions.items():
-        st.write(f"**{column}**: {definition}")
-
-    # Section 3: Data Quality Overview (Missing Values and Duplicates)
-    st.subheader("Data Quality Overview")
-    missing_data = df.isnull().sum() / len(df) * 100  # Percentage of missing data
-    missing_data = missing_data[missing_data > 0].sort_values(ascending=False)
-    
-    st.write("Missing Data Percentages:")
-    st.bar_chart(missing_data)
-    
-    # Check for duplicates
-    duplicates = df.duplicated().sum()
-    st.write(f"Number of duplicate rows: {duplicates}")
-
-    # Section 4: Feature Distribution and Data Types
-    st.subheader("Feature Distribution")
-    st.write("""
-        Understanding the distribution of features, especially numerical ones like 'Age' 
-        and 'Fare', is important to identify any skewness, outliers, or patterns in the data.
-    """)
-    
-    # Display histograms for numerical features
-    fig, ax = plt.subplots(1, 2, figsize=(15, 6))
-    sns.histplot(df['Age'], kde=True, ax=ax[0], color='skyblue')
-    ax[0].set_title('Age Distribution')
-    sns.histplot(df['Fare'], kde=True, ax=ax[1], color='orange')
-    ax[1].set_title('Fare Distribution')
-    st.pyplot(fig)
-
-    # Section 5: Statistical Summary
-    st.subheader("Summary Statistics")
-    st.write(df.describe())
+    return df
 
 # Predicting Survival
 def predicting_survival(train_df, test_df):
@@ -134,6 +70,7 @@ def predicting_survival(train_df, test_df):
     df = train_df.copy()
     df = create_age_groups(df)
     df = create_fare_groups(df)
+    df = handle_missing_values(df)  # Handle missing values
     df = encode_categorical_columns(df)
 
     # Define features and target variable
@@ -144,14 +81,10 @@ def predicting_survival(train_df, test_df):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Model selection
-    model_choice = st.selectbox("Select Model", ["Logistic Regression", "Random Forest", "XGBoost"])
+    model_choice = st.selectbox("Select Model", ["Random Forest", "XGBoost"])
 
     # Hyperparameter tuning for each model
-    if model_choice == "Logistic Regression":
-        C = st.slider("Regularization Strength (C)", 0.01, 10.0, 1.0)
-        model = LogisticRegression(C=C, max_iter=1000)
-        
-    elif model_choice == "Random Forest":
+    if model_choice == "Random Forest":
         n_estimators = st.slider("Number of Trees", 10, 200, 100)
         max_depth = st.slider("Max Depth", 2, 20, 10)
         model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
@@ -193,6 +126,7 @@ def predicting_survival(train_df, test_df):
         test_data = test_df.copy()
         test_data = create_age_groups(test_data)
         test_data = create_fare_groups(test_data)
+        test_data = handle_missing_values(test_data)  # Handle missing values in test data
         test_data = encode_categorical_columns(test_data)
         X_test_data = test_data.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'])
         
@@ -221,4 +155,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
