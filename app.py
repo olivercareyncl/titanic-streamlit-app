@@ -1,6 +1,6 @@
 # app.py
 import streamlit as st
-from data_overview import data_overview, load_data  # Corrected import for load_data
+from data_overview import data_overview, load_data
 from survival_analysis import survival_analysis
 from predicting_survival import predicting_survival
 
