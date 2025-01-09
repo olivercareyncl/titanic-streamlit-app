@@ -13,9 +13,17 @@ def main():
     
     # Display the dataset
     st.title("Titanic Dataset")
+    
     st.subheader("Data Overview")
     st.write(train_df.head())
+    
+    # Display Basic Statistics
+    st.subheader("Basic Statistics")
+    st.write(train_df.describe())
+    
+    # Show missing values
+    st.subheader("Missing Values")
+    st.write(train_df.isnull().sum())
 
 if __name__ == "__main__":
     main()
-
