@@ -102,3 +102,4 @@ def predicting_survival(train_df, test_df):
         test_df['Survived Prediction'] = test_predictions
         
         st.write(test_df[['PassengerId', 'Survived Prediction']].head())  # Show the first few predictions
+
