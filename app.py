@@ -62,29 +62,45 @@ def data_overview(df):
     st.subheader("Summary Statistics")
     st.write(df.describe())
 
-    # Section 5: Relationships between Features
-    st.subheader("Relationships Between Features")
-    st.write("""
-        Here, you can choose a feature to plot against the survival rate. This will help 
-        you explore how different features relate to the likelihood of survival.
-    """)
+def survival_analysis(df):
+    st.header("Survival Analysis")
     
-    feature_column = st.selectbox("Select Feature to Plot Against Survival", df.columns)
+    st.write("""
+        In this section, we will investigate how different features or combinations of features affect the survival rate of passengers. 
+        The goal is to understand which factors had the most influence on whether a passenger survived or not.
+    """)
+
+    # Select feature or combination of features to analyze
+    feature_column = st.selectbox("Select Feature to Analyze Against Survival", df.columns)
 
     if feature_column:
+        # Plotting survival rate based on selected feature
         fig, ax = plt.subplots(figsize=(8, 6))
-        sns.boxplot(x='Survived', y=feature_column, data=df, ax=ax)
-        ax.set_title(f'{feature_column} vs Survival')
+        sns.barplot(x=feature_column, y='Survived', data=df, ax=ax, palette="muted")
+        ax.set_title(f'Survival Rate by {feature_column}')
         st.pyplot(fig)
 
-    # Section 6: Remove Categorical Features Table and Plot
-    # We are skipping this section based on your request.
+    # Investigating combinations of features
+    st.subheader("Survival Rate by Feature Combinations")
+    
+    feature1 = st.selectbox("Select First Feature", df.columns)
+    feature2 = st.selectbox("Select Second Feature", df.columns)
+
+    if feature1 and feature2:
+        # Cross-tabulation and visualization for combinations of features
+        contingency_table = pd.crosstab(df[feature1], df[feature2], df['Survived'], aggfunc='mean').fillna(0)
+        st.write(contingency_table)
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.heatmap(contingency_table, annot=True, cmap="coolwarm", fmt='.2f', ax=ax)
+        ax.set_title(f'Survival Rate by {feature1} and {feature2}')
+        st.pyplot(fig)
 
 def main():
     st.title("Titanic Survival Prediction App")
 
     # Sidebar for navigation
-    tab = st.sidebar.selectbox("Select Tab", ["Data Overview", "Data Visualization", "Model Building", "Model Performance"])
+    tab = st.sidebar.selectbox("Select Tab", ["Data Overview", "Survival Analysis", "Model Building", "Model Performance"])
 
     # Load dataset
     train_df = load_data()
@@ -92,14 +108,8 @@ def main():
     if tab == "Data Overview":
         data_overview(train_df)
 
-    elif tab == "Data Visualization":
-        st.header("Data Visualization")
-        plot_type = st.selectbox("Select Visualization", [
-            "Survival Rate by Gender", "Survival Rate by Pclass", "Age Distribution", "Fare Distribution",
-            "Survival Rate by Age Group"
-        ])
-        # Generate the selected plot (same as before)
-        plot_visualization(train_df, plot_type)
+    elif tab == "Survival Analysis":
+        survival_analysis(train_df)
 
     elif tab == "Model Building":
         st.header("Model Building and Prediction")
@@ -116,5 +126,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
