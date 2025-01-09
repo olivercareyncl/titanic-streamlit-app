@@ -53,9 +53,11 @@ def plot_visualization(df, plot_type):
     if plot_type == "Survival Rate by Gender":
         sns.barplot(x='Sex', y='Survived', data=df, ax=ax)
         ax.set_title('Survival Rate by Gender')
+        ax.bar_label(ax.containers[0], fmt='%.2f', color='white')  # Add percentage labels
     elif plot_type == "Survival Rate by Pclass":
         sns.barplot(x='Pclass', y='Survived', data=df, ax=ax)
         ax.set_title('Survival Rate by Passenger Class')
+        ax.bar_label(ax.containers[0], fmt='%.2f', color='white')  # Add percentage labels
     elif plot_type == "Age Distribution":
         sns.histplot(df['Age'], kde=True, ax=ax)
         ax.set_title('Age Distribution of Passengers')
