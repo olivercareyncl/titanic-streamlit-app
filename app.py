@@ -46,22 +46,22 @@ def data_overview(df):
     st.write(data_types)
 
     # Feature Definitions
-feature_definitions = {
-    'PassengerId': 'Unique ID assigned to each passenger.',
-    'Pclass': 'Passenger class (1 = 1st; 2 = 2nd; 3 = 3rd).',
-    'Name': 'Name of the passenger.',
-    'Sex': 'Gender of the passenger (male, female).',
-    'Age': 'Age of the passenger in years.',
-    'SibSp': 'Number of siblings or spouses aboard the Titanic.',
-    'Parch': 'Number of parents or children aboard the Titanic.',
-    'Ticket': 'Ticket number.',
-    'Fare': 'Fare paid by the passenger.',
-    'Cabin': 'Cabin number where the passenger stayed.',
-    'Embarked': 'Port of embarkation (C = Cherbourg; Q = Queenstown; S = Southampton).',
-    'Survived': 'Survival status (0 = No; 1 = Yes).',
-    'Age Group': 'Categorized age group (Infant, Child, Teen, Adult, Senior, Elderly).',
-    'Fare Group': 'Categorized fare group (Low Fare, Medium Fare, High Fare, Very High Fare).'
-}
+    feature_definitions = {
+        'PassengerId': 'Unique ID assigned to each passenger.',
+        'Pclass': 'Passenger class (1 = 1st; 2 = 2nd; 3 = 3rd).',
+        'Name': 'Name of the passenger.',
+        'Sex': 'Gender of the passenger (male, female).',
+        'Age': 'Age of the passenger in years.',
+        'SibSp': 'Number of siblings or spouses aboard the Titanic.',
+        'Parch': 'Number of parents or children aboard the Titanic.',
+        'Ticket': 'Ticket number.',
+        'Fare': 'Fare paid by the passenger.',
+        'Cabin': 'Cabin number where the passenger stayed.',
+        'Embarked': 'Port of embarkation (C = Cherbourg; Q = Queenstown; S = Southampton).',
+        'Survived': 'Survival status (0 = No; 1 = Yes).',
+        'Age Group': 'Categorized age group (Infant, Child, Teen, Adult, Senior, Elderly).',
+        'Fare Group': 'Categorized fare group (Low Fare, Medium Fare, High Fare, Very High Fare).'
+    }
 
     # Section 2: Feature Definitions
     st.subheader("Feature Definitions")
