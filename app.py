@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Function to load the dataset
 @st.cache_data
@@ -28,9 +29,16 @@ def main():
     
     # Display a visualization: Survival Rate by Gender
     st.subheader("Survival Rate by Gender")
-    sns.barplot(x='Sex', y='Survived', data=train_df)
-    st.pyplot()
+    
+    # Create the figure
+    fig, ax = plt.subplots()
+    sns.barplot(x='Sex', y='Survived', data=train_df, ax=ax)
+    
+    # Pass the figure to st.pyplot()
+    st.pyplot(fig)
 
 if __name__ == "__main__":
+    main()
+
     main()
 
