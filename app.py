@@ -48,20 +48,42 @@ def build_model(df, model_name):
     return model, accuracy, precision, recall, f1, conf_matrix
 
 # Function for plotting visualizations with legends
-def plot_visualization(df, plot_type, x_col, y_col, hue=None):
+def plot_visualization(df, plot_type):
     fig, ax = plt.subplots()
-    if plot_type == "Bar Plot":
-        sns.barplot(x=x_col, y=y_col, data=df, ax=ax, hue=hue)
-    elif plot_type == "Scatter Plot":
-        sns.scatterplot(x=x_col, y=y_col, data=df, ax=ax, hue=hue)
-    elif plot_type == "Line Plot":
-        sns.lineplot(x=x_col, y=y_col, data=df, ax=ax, hue=hue)
-    elif plot_type == "Histogram":
-        sns.histplot(df[x_col], kde=True, ax=ax, hue=hue)
-    
-    # Show legend if hue is provided
-    if hue:
-        ax.legend(title=hue)
+    if plot_type == "Survival Rate by Gender":
+        sns.barplot(x='Sex', y='Survived', data=df, ax=ax)
+        ax.set_title('Survival Rate by Gender')
+    elif plot_type == "Survival Rate by Pclass":
+        sns.barplot(x='Pclass', y='Survived', data=df, ax=ax)
+        ax.set_title('Survival Rate by Passenger Class')
+    elif plot_type == "Age Distribution":
+        sns.histplot(df['Age'], kde=True, ax=ax)
+        ax.set_title('Age Distribution of Passengers')
+    elif plot_type == "Fare Distribution":
+        sns.histplot(df['Fare'], kde=True, ax=ax)
+        ax.set_title('Fare Distribution of Passengers')
+    elif plot_type == "Survival Rate by Age Group":
+        bins = [0, 12, 18, 35, 60, 100]
+        labels = ['Child', 'Teen', 'Adult', 'Senior', 'Elderly']
+        df['AgeGroup'] = pd.cut(df['Age'], bins=bins, labels=labels)
+        sns.barplot(x='AgeGroup', y='Survived', data=df, ax=ax)
+        ax.set_title('Survival Rate by Age Group')
+    elif plot_type == "Survival Rate by Embarked":
+        sns.barplot(x='Embarked', y='Survived', data=df, ax=ax)
+        ax.set_title('Survival Rate by Embarked Location')
+    elif plot_type == "Fare vs Age":
+        sns.scatterplot(x='Fare', y='Age', data=df, ax=ax)
+        ax.set_title('Fare vs Age')
+    elif plot_type == "Pclass vs Age":
+        sns.scatterplot(x='Pclass', y='Age', data=df, ax=ax)
+        ax.set_title('Pclass vs Age')
+    elif plot_type == "Correlation Heatmap":
+        corr = df[['Age', 'Fare', 'Pclass', 'Sex']].corr()
+        sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
+        ax.set_title('Correlation Heatmap')
+    elif plot_type == "Survival Rate by Pclass and Sex":
+        sns.countplot(x='Pclass', hue='Sex', data=df, ax=ax)
+        ax.set_title('Survival Rate by Pclass and Sex')
 
     st.pyplot(fig)
 
@@ -89,20 +111,14 @@ def main():
         st.header("Data Visualization")
 
         # Dropdown to select plot type
-        plot_type = st.selectbox("Select Plot Type", ["Bar Plot", "Scatter Plot", "Line Plot", "Histogram"])
-
-        # Dropdowns to select x and y variables
-        x_variable = st.selectbox("Select X Variable", train_df.columns)
-        y_variable = st.selectbox("Select Y Variable", train_df.columns)
-
-        # Dropdown to select hue variable (optional for legend)
-        hue_variable = st.selectbox("Select Hue Variable (Optional)", ["None"] + list(train_df.select_dtypes(include=['object']).columns))
-
-        # Set hue to None if 'None' is selected
-        hue = hue_variable if hue_variable != "None" else None
+        plot_type = st.selectbox("Select Visualization", [
+            "Survival Rate by Gender", "Survival Rate by Pclass", "Age Distribution", "Fare Distribution",
+            "Survival Rate by Age Group", "Survival Rate by Embarked", "Fare vs Age", "Pclass vs Age",
+            "Correlation Heatmap", "Survival Rate by Pclass and Sex"
+        ])
 
         # Generate the selected plot
-        plot_visualization(train_df, plot_type, x_variable, y_variable, hue)
+        plot_visualization(train_df, plot_type)
 
     elif tab == "Model Building":
         st.header("Model Building and Prediction")
