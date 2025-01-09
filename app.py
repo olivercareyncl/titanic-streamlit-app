@@ -13,64 +13,64 @@ def load_data():
 def data_overview(df):
     st.header("Data Overview")
     
-    # Section 1: Dataset Overview
-    st.subheader("Dataset Overview")
-    st.write("""
-        This dataset contains information about passengers aboard the Titanic, including 
-        features such as their survival status, age, class, fare, and more. Understanding 
-        this data is crucial before proceeding to deeper analyses or predictive modeling.
-    """)
-    
-    st.write(f"Number of Rows: {df.shape[0]}")
-    st.write(f"Number of Columns: {df.shape[1]}")
-    st.write(f"Data Types:\n{df.dtypes}")
+    # Dataset preview
+    st.subheader("Dataset Preview")
+    num_rows = st.slider("Number of rows to display", 5, 100, 10)
+    st.write(df.head(num_rows))
 
-    # Section 2: Data Quality Overview (Missing Values and Duplicates)
-    st.subheader("Data Quality Overview")
-    missing_data = df.isnull().sum() / len(df) * 100
+    # Missing Data Analysis
+    st.subheader("Missing Data Analysis")
+    missing_data = df.isnull().sum() / len(df) * 100  # Percentage of missing data
     missing_data = missing_data[missing_data > 0].sort_values(ascending=False)
     
-    st.write("Missing Data Percentages:")
-    st.bar_chart(missing_data)
+    if len(missing_data) > 0:
+        st.bar_chart(missing_data)
+    else:
+        st.write("No missing data")
     
-    # Check for duplicates
-    duplicates = df.duplicated().sum()
-    st.write(f"Number of duplicate rows: {duplicates}")
+    # Fill missing values for numerical columns with the median or mean
+    df['Age'].fillna(df['Age'].median(), inplace=True)  # Filling missing Age with the median
+    df['Fare'].fillna(df['Fare'].median(), inplace=True)  # Filling missing Fare with the median
+    df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)  # Filling missing Embarked with the mode
+    df['Cabin'].fillna('Unknown', inplace=True)  # Filling missing Cabin with 'Unknown'
 
-    # Section 3: Feature Distribution and Data Types
-    st.subheader("Feature Distribution")
-    st.write("""
-        Understanding the distribution of features, especially numerical ones like 'Age' 
-        and 'Fare', is important to identify any skewness, outliers, or patterns in the data.
-    """)
-    
-    # Display histograms for numerical features
-    fig, ax = plt.subplots(1, 2, figsize=(15, 6))
-    sns.histplot(df['Age'], kde=True, ax=ax[0], color='skyblue')
-    ax[0].set_title('Age Distribution')
-    sns.histplot(df['Fare'], kde=True, ax=ax[1], color='orange')
-    ax[1].set_title('Fare Distribution')
-    st.pyplot(fig)
+    # Column Information (Meta-data)
+    st.subheader("Column Information")
+    column_info = pd.DataFrame({
+        'Data Type': df.dtypes,
+        'Missing Values': df.isnull().sum(),
+        'Unique Values': df.nunique(),
+        'Example Values': [df[col].dropna().unique()[:3] for col in df.columns]
+    })
+    st.write(column_info)
 
-    # Section 4: Statistical Summary
+    # Summary Statistics
     st.subheader("Summary Statistics")
     st.write(df.describe())
 
-    # Section 5: Relationships between Features
-    st.subheader("Relationships Between Features")
-    st.write("""
-        Understanding how different features interact with each other is crucial in determining 
-        which features are likely to influence survival predictions.
-    """)
-    
-    # Scatter plot for 'Age' vs 'Fare'
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.scatterplot(x='Age', y='Fare', data=df, ax=ax, color='purple')
-    ax.set_title("Age vs Fare")
-    st.pyplot(fig)
+    # Section: Relationships Between Features and Survival
+    st.subheader("Relationships Between Features and Survival Rate")
 
-    # Section 6: Categorical Features Summary
-    st.subheader("Categorical Features Overview")
+    # For numerical features: Show relationship with Survival using Boxplots
+    numerical_features = ['Age', 'Fare']
+    for feature in numerical_features:
+        st.write(f"**{feature}** vs Survived")
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.boxplot(x='Survived', y=feature, data=df, ax=ax, palette='muted')
+        ax.set_title(f'{feature} Distribution by Survival')
+        st.pyplot(fig)
+
+    # For categorical features: Show relationship with Survival using Bar Plots
+    categorical_features = ['Pclass', 'Sex', 'Embarked']
+    for feature in categorical_features:
+        st.write(f"**{feature}** vs Survived")
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.barplot(x=feature, y='Survived', data=df, ax=ax, palette='muted')
+        ax.set_title(f'Survival Rate by {feature}')
+        st.pyplot(fig)
+
+    # Section: Categorical Columns Overview
+    st.subheader("Categorical Columns Overview")
     categorical_columns = df.select_dtypes(include=['object']).columns
     for col in categorical_columns:
         st.write(f"**{col}**")
