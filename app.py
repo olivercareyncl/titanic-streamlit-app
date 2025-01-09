@@ -20,13 +20,17 @@ def data_overview(df):
 
     # Column Information (Meta-data)
     st.subheader("Column Information")
-    column_info = pd.DataFrame({
-        'Data Type': df.dtypes,
-        'Missing Values': df.isnull().sum(),
-        'Unique Values': df.nunique(),
-        'Example Values': [df[col].dropna().unique()[:3] for col in df.columns]
-    })
-    st.write(column_info)
+    try:
+        column_info = pd.DataFrame({
+            'Data Type': df.dtypes,
+            'Missing Values': df.isnull().sum(),
+            'Unique Values': df.nunique(),
+            'Example Values': [df[col].dropna().unique()[:3] for col in df.columns]
+        })
+        # Display in a simplified format to avoid pyarrow issues
+        st.write(column_info)
+    except Exception as e:
+        st.write(f"Error displaying column information: {e}")
 
     # Missing Data Analysis
     st.subheader("Missing Data Analysis")
