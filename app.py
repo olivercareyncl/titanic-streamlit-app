@@ -9,13 +9,13 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.impute import SimpleImputer
 import xgboost as xgb
 
-# Load the Titanic dataset
+# Function to load the dataset
 @st.cache_data
 def load_data():
     train_df = pd.read_csv('train.csv')
     return train_df
 
-# Function to build the selected model
+# Function to build and return the model based on user's selection
 @st.cache_resource
 def build_model(df, model_name):
     df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
@@ -47,15 +47,22 @@ def build_model(df, model_name):
 
     return model, accuracy, precision, recall, f1, conf_matrix
 
-# Function for plotting visualizations
-def plot_visualization(df, plot_type, x_col, y_col):
+# Function for plotting visualizations with legends
+def plot_visualization(df, plot_type, x_col, y_col, hue=None):
     fig, ax = plt.subplots()
     if plot_type == "Bar Plot":
-        sns.barplot(x=x_col, y=y_col, data=df, ax=ax)
+        sns.barplot(x=x_col, y=y_col, data=df, ax=ax, hue=hue)
     elif plot_type == "Scatter Plot":
-        sns.scatterplot(x=x_col, y=y_col, data=df, ax=ax)
+        sns.scatterplot(x=x_col, y=y_col, data=df, ax=ax, hue=hue)
     elif plot_type == "Line Plot":
-        sns.lineplot(x=x_col, y=y_col, data=df, ax=ax)
+        sns.lineplot(x=x_col, y=y_col, data=df, ax=ax, hue=hue)
+    elif plot_type == "Histogram":
+        sns.histplot(df[x_col], kde=True, ax=ax, hue=hue)
+    
+    # Show legend if hue is provided
+    if hue:
+        ax.legend(title=hue)
+
     st.pyplot(fig)
 
 def main():
@@ -82,13 +89,20 @@ def main():
         st.header("Data Visualization")
 
         # Dropdown to select plot type
-        plot_type = st.selectbox("Select Plot Type", ["Bar Plot", "Scatter Plot", "Line Plot"])
+        plot_type = st.selectbox("Select Plot Type", ["Bar Plot", "Scatter Plot", "Line Plot", "Histogram"])
 
         # Dropdowns to select x and y variables
         x_variable = st.selectbox("Select X Variable", train_df.columns)
         y_variable = st.selectbox("Select Y Variable", train_df.columns)
 
-        plot_visualization(train_df, plot_type, x_variable, y_variable)
+        # Dropdown to select hue variable (optional for legend)
+        hue_variable = st.selectbox("Select Hue Variable (Optional)", ["None"] + list(train_df.select_dtypes(include=['object']).columns))
+
+        # Set hue to None if 'None' is selected
+        hue = hue_variable if hue_variable != "None" else None
+
+        # Generate the selected plot
+        plot_visualization(train_df, plot_type, x_variable, y_variable, hue)
 
     elif tab == "Model Building":
         st.header("Model Building and Prediction")
@@ -145,6 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
