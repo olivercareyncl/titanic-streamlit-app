@@ -23,11 +23,17 @@ def data_overview(df):
     
     st.write(f"Number of Rows: {df.shape[0]}")
     st.write(f"Number of Columns: {df.shape[1]}")
-    st.write(f"Data Types:\n{df.dtypes}")
+    
+    # Show data types in table format
+    data_types = pd.DataFrame({
+        'Column Name': df.columns,
+        'Data Type': df.dtypes
+    })
+    st.write(data_types)
 
     # Section 2: Data Quality Overview (Missing Values and Duplicates)
     st.subheader("Data Quality Overview")
-    missing_data = df.isnull().sum() / len(df) * 100
+    missing_data = df.isnull().sum() / len(df) * 100  # Percentage of missing data
     missing_data = missing_data[missing_data > 0].sort_values(ascending=False)
     
     st.write("Missing Data Percentages:")
@@ -59,23 +65,20 @@ def data_overview(df):
     # Section 5: Relationships between Features
     st.subheader("Relationships Between Features")
     st.write("""
-        Understanding how different features interact with each other is crucial in determining 
-        which features are likely to influence survival predictions.
+        Here, you can choose a feature to plot against the survival rate. This will help 
+        you explore how different features relate to the likelihood of survival.
     """)
     
-    # Scatter plot for 'Age' vs 'Fare'
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.scatterplot(x='Age', y='Fare', data=df, ax=ax, color='purple')
-    ax.set_title("Age vs Fare")
-    st.pyplot(fig)
+    feature_column = st.selectbox("Select Feature to Plot Against Survival", df.columns)
 
-    # Section 6: Categorical Features Summary
-    st.subheader("Categorical Features Overview")
-    categorical_columns = df.select_dtypes(include=['object']).columns
-    for col in categorical_columns:
-        st.write(f"**{col}**")
-        st.write(df[col].value_counts())
-        st.bar_chart(df[col].value_counts())
+    if feature_column:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.boxplot(x='Survived', y=feature_column, data=df, ax=ax)
+        ax.set_title(f'{feature_column} vs Survival')
+        st.pyplot(fig)
+
+    # Section 6: Remove Categorical Features Table and Plot
+    # We are skipping this section based on your request.
 
 def main():
     st.title("Titanic Survival Prediction App")
@@ -113,4 +116,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
