@@ -47,49 +47,37 @@ def build_model(df, model_name):
 
     return model, accuracy, precision, recall, f1, conf_matrix
 
-# Function for plotting visualizations with enhanced interactivity
-def plot_visualization(df, plot_type, hue=None):
+# Function for plotting the top 5 visualizations
+def plot_visualization(df, plot_type):
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Apply user-defined color palette
-    palette = st.color_picker('Pick a color palette', '#1f77b4')
-    
+    # Use a professional color palette
+    palette = sns.color_palette("muted")
+
     if plot_type == "Survival Rate by Gender":
-        sns.barplot(x='Sex', y='Survived', data=df, ax=ax, palette=[palette, '#ff7f0e'])
+        sns.barplot(x='Sex', y='Survived', data=df, ax=ax, palette=palette)
         ax.set_title('Survival Rate by Gender')
         ax.bar_label(ax.containers[0], fmt='%.2f', color='white')  # Add percentage labels
+
     elif plot_type == "Survival Rate by Pclass":
-        sns.barplot(x='Pclass', y='Survived', data=df, ax=ax, palette='Blues')
+        sns.barplot(x='Pclass', y='Survived', data=df, ax=ax, palette=palette)
         ax.set_title('Survival Rate by Passenger Class')
         ax.bar_label(ax.containers[0], fmt='%.2f', color='white')  # Add percentage labels
+
     elif plot_type == "Age Distribution":
-        sns.histplot(df['Age'], kde=True, ax=ax, color=palette)
+        sns.histplot(df['Age'], kde=True, ax=ax, color=palette[0])
         ax.set_title('Age Distribution of Passengers')
+
     elif plot_type == "Fare Distribution":
-        sns.histplot(df['Fare'], kde=True, ax=ax, color=palette)
+        sns.histplot(df['Fare'], kde=True, ax=ax, color=palette[0])
         ax.set_title('Fare Distribution of Passengers')
+
     elif plot_type == "Survival Rate by Age Group":
         bins = [0, 12, 18, 35, 60, 100]
         labels = ['Child', 'Teen', 'Adult', 'Senior', 'Elderly']
         df['AgeGroup'] = pd.cut(df['Age'], bins=bins, labels=labels)
-        sns.barplot(x='AgeGroup', y='Survived', data=df, ax=ax, palette='coolwarm')
+        sns.barplot(x='AgeGroup', y='Survived', data=df, ax=ax, palette=palette)
         ax.set_title('Survival Rate by Age Group')
-    elif plot_type == "Survival Rate by Embarked":
-        sns.barplot(x='Embarked', y='Survived', data=df, ax=ax, palette='viridis')
-        ax.set_title('Survival Rate by Embarked Location')
-    elif plot_type == "Fare vs Age":
-        sns.scatterplot(x='Fare', y='Age', data=df, ax=ax, hue=hue, palette='viridis')
-        ax.set_title('Fare vs Age')
-    elif plot_type == "Pclass vs Age":
-        sns.scatterplot(x='Pclass', y='Age', data=df, ax=ax, hue=hue, palette='coolwarm')
-        ax.set_title('Pclass vs Age')
-    elif plot_type == "Correlation Heatmap":
-        corr = df[['Age', 'Fare', 'Pclass', 'Sex']].corr()
-        sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
-        ax.set_title('Correlation Heatmap')
-    elif plot_type == "Survival Rate by Pclass and Sex":
-        sns.countplot(x='Pclass', hue='Sex', data=df, ax=ax, palette='Set1')
-        ax.set_title('Survival Rate by Pclass and Sex')
 
     st.pyplot(fig)
 
@@ -119,18 +107,11 @@ def main():
         # Dropdown to select plot type
         plot_type = st.selectbox("Select Visualization", [
             "Survival Rate by Gender", "Survival Rate by Pclass", "Age Distribution", "Fare Distribution",
-            "Survival Rate by Age Group", "Survival Rate by Embarked", "Fare vs Age", "Pclass vs Age",
-            "Correlation Heatmap", "Survival Rate by Pclass and Sex"
+            "Survival Rate by Age Group"
         ])
 
-        # Dropdown to select hue variable (optional for legend)
-        hue_variable = st.selectbox("Select Hue Variable (Optional)", ["None", "Sex", "Pclass", "Embarked"])
-
-        # Set hue to None if 'None' is selected
-        hue = hue_variable if hue_variable != "None" else None
-
         # Generate the selected plot
-        plot_visualization(train_df, plot_type, hue)
+        plot_visualization(train_df, plot_type)
 
     elif tab == "Model Building":
         st.header("Model Building and Prediction")
@@ -187,4 +168,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
