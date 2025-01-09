@@ -1,3 +1,10 @@
+pip install streamlit==1.17.0
+pip install pandas==1.3.3
+pip install matplotlib==3.4.3
+pip install seaborn==0.11.2
+pip install scikit-learn==0.24.2
+pip install xgboost==1.4.2
+
 import streamlit as st
 import pandas as pd
 import seaborn as sns
