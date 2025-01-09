@@ -111,10 +111,14 @@ def survival_analysis(df):
     feature2 = st.selectbox("Select Second Feature", available_columns)
 
     if feature1 and feature2:
-        # Cross-tabulation and visualization for combinations of features
+        # Cross-tabulation for combinations of features (counts)
         contingency_table = pd.crosstab(df[feature1], df[feature2], df['Survived'], aggfunc='mean').fillna(0)
-        st.write(contingency_table)
+        count_table = pd.crosstab(df[feature1], df[feature2])  # Counts of passengers for each combination
 
+        st.write("Passenger Count for Each Combination:")
+        st.write(count_table)  # Show count of passengers for each combination
+
+        # Visualize survival rate by combination
         fig, ax = plt.subplots(figsize=(10, 6))
         sns.heatmap(contingency_table, annot=True, cmap="coolwarm", fmt='.2f', ax=ax)
         ax.set_title(f'Survival Rate by {feature1} and {feature2}')
