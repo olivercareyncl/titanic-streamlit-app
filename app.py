@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import seaborn as sns
 
 # Function to load the dataset
 @st.cache_data
@@ -24,6 +25,12 @@ def main():
     # Show missing values
     st.subheader("Missing Values")
     st.write(train_df.isnull().sum())
+    
+    # Display a visualization: Survival Rate by Gender
+    st.subheader("Survival Rate by Gender")
+    sns.barplot(x='Sex', y='Survived', data=train_df)
+    st.pyplot()
 
 if __name__ == "__main__":
     main()
+
