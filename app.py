@@ -11,16 +11,16 @@ def load_data():
 
 # Create Age Groups
 def create_age_groups(df):
-    bins = [0, 12, 18, 35, 60, 100]
-    labels = ['Child', 'Teen', 'Adult', 'Senior', 'Elderly']
-    df['Age Group'] = pd.cut(df['Age'], bins=bins, labels=labels)
+    bins = [0, 2, 12, 18, 35, 60, 100]
+    labels = ['Infant', 'Child', 'Teen', 'Adult', 'Senior', 'Elderly']
+    df['Age Group'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
     return df
 
-# Create Fare Groups
+# Create Fare Groups based on the percentiles
 def create_fare_groups(df):
-    bins = [0, 7.91, 14.454, 31, 513]  # These bins are chosen based on the distribution of the 'Fare' column
-    labels = ['Low', 'Medium', 'High', 'Very High']
-    df['Fare Group'] = pd.cut(df['Fare'], bins=bins, labels=labels)
+    bins = [0, 7.91, 14.45, 31, 512]  # 0th, 25th, 50th, 75th percentiles, max
+    labels = ['Low Fare', 'Medium Fare', 'High Fare', 'Very High Fare']
+    df['Fare Group'] = pd.cut(df['Fare'], bins=bins, labels=labels, right=False)
     return df
 
 # Enhanced Data Overview
