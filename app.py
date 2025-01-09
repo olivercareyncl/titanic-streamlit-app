@@ -1,19 +1,12 @@
-pip install streamlit==1.17.0
-pip install pandas==1.3.3
-pip install matplotlib==3.4.3
-pip install seaborn==0.11.2
-pip install scikit-learn==0.24.2
-pip install xgboost==1.4.2
-
 import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier
 
 # Function to load the dataset
@@ -48,6 +41,18 @@ def encode_categorical_columns(df):
     
     # Encode 'Age Group' and 'Fare Group' as they are already categorical
     df = pd.get_dummies(df, columns=['Age Group', 'Fare Group'], drop_first=True)
+    
+    return df
+
+# Function to handle missing values
+def handle_missing_values(df):
+    # Using SimpleImputer to fill missing values for numerical features
+    imputer_num = SimpleImputer(strategy='mean')  # Use mean for numerical columns
+    df[['Age', 'Fare']] = imputer_num.fit_transform(df[['Age', 'Fare']])
+    
+    # Using SimpleImputer to fill missing values for categorical features
+    imputer_cat = SimpleImputer(strategy='most_frequent')  # Use most frequent (mode) for categorical columns
+    df[['Embarked']] = imputer_cat.fit_transform(df[['Embarked']])
     
     return df
 
@@ -141,11 +146,8 @@ def predicting_survival(train_df, test_df):
     df = train_df.copy()
     df = create_age_groups(df)
     df = create_fare_groups(df)
+    df = handle_missing_values(df)  # Handle missing values
     df = encode_categorical_columns(df)
-
-    # Handle missing values
-    imputer = SimpleImputer(strategy='mean')
-    df[['Age', 'Fare']] = imputer.fit_transform(df[['Age', 'Fare']])
 
     # Define features and target variable
     X = df.drop(columns=['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin'])
@@ -158,7 +160,7 @@ def predicting_survival(train_df, test_df):
     model_choice = st.selectbox("Select Model", ["Random Forest", "XGBoost"])
 
     # Hyperparameter tuning for each model
-    if  model_choice == "Random Forest":
+    if model_choice == "Random Forest":
         n_estimators = st.slider("Number of Trees", 10, 200, 100)
         max_depth = st.slider("Max Depth", 2, 20, 10)
         model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
@@ -200,8 +202,8 @@ def predicting_survival(train_df, test_df):
         test_data = test_df.copy()
         test_data = create_age_groups(test_data)
         test_data = create_fare_groups(test_data)
+        test_data = handle_missing_values(test_data)  # Handle missing values in test data
         test_data = encode_categorical_columns(test_data)
-        test_data[['Age', 'Fare']] = imputer.transform(test_data[['Age', 'Fare']])  # Ensure test data has the same preprocessing
         X_test_data = test_data.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'])
         
         test_predictions = model.predict(X_test_data)
@@ -222,10 +224,11 @@ def main():
         data_overview(train_df)
 
     elif tab == "Survival Analysis":
-        survival_analysis(train_df)  # Ensure you have this function defined, if needed
+        survival_analysis(train_df)
 
     elif tab == "Predicting Survival":
         predicting_survival(train_df, test_df)
 
 if __name__ == "__main__":
     main()
+
