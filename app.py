@@ -111,14 +111,20 @@ def survival_analysis(df):
     feature2 = st.selectbox("Select Second Feature", available_columns)
 
     if feature1 and feature2:
-        # Cross-tabulation and visualization for combinations of features
-        contingency_table = pd.crosstab(df[feature1], df[feature2], df['Survived'], aggfunc='mean').fillna(0)
+        # Cross-tabulation for survival rate (mean) and count of passengers
+        contingency_table = pd.crosstab([df[feature1], df[feature2]], df['Survived'], aggfunc='mean').fillna(0)
+        count_table = pd.crosstab([df[feature1], df[feature2]], df['Survived'], aggfunc='size').fillna(0)
+        
+        st.write("Survival Rate (Mean) Table:")
         st.write(contingency_table)
 
+        # Plotting the heatmap with survival rate and count
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.heatmap(contingency_table, annot=True, cmap="coolwarm", fmt='.2f', ax=ax)
-        ax.set_title(f'Survival Rate by {feature1} and {feature2}')
+        sns.heatmap(contingency_table, annot=count_table, cmap="coolwarm", fmt='.2f', cbar_kws={'label': 'Survival Rate'},
+                    annot_kws={"size": 10}, ax=ax)
+        ax.set_title(f'Survival Rate by {feature1} and {feature2} (Count of Passengers included)')
         st.pyplot(fig)
+
 
 def main():
     st.title("Titanic Survival Prediction App")
