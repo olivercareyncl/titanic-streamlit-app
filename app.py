@@ -91,6 +91,9 @@ def survival_analysis(df):
     df = create_age_groups(df)
     df = create_fare_groups(df)
 
+    # Add the new columns (Age Group and Fare Group) to available columns for the dropdown
+    available_columns.extend(['Age Group', 'Fare Group'])
+
     # Select feature or combination of features to analyze
     feature_column = st.selectbox("Select Feature to Analyze Against Survival", available_columns)
 
@@ -147,6 +150,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
