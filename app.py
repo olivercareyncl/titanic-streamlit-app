@@ -36,13 +36,16 @@ def data_overview(df):
 
     # Column Information (Meta-data)
     st.subheader("Column Information")
-    column_info = pd.DataFrame({
-        'Data Type': df.dtypes,
-        'Missing Values': df.isnull().sum(),
-        'Unique Values': df.nunique(),
-        'Example Values': [df[col].dropna().unique()[:3] for col in df.columns]
-    })
-    st.write(column_info)
+
+    # Display Data Types, Missing Values, and Unique Values in a simplified format
+    for col in df.columns:
+        st.write(f"**{col}**")
+        st.write(f"  - Data Type: {df[col].dtype}")
+        st.write(f"  - Missing Values: {df[col].isnull().sum()} ({df[col].isnull().sum() / len(df) * 100:.2f}%)")
+        st.write(f"  - Unique Values: {df[col].nunique()}")
+        if df[col].dtype == 'object' or df[col].dtype == 'datetime64[ns]':
+            st.write(f"  - Example Values: {df[col].dropna().unique()[:3]}")  # Show example values for non-numeric columns
+        st.write("")  # Add a line break for better readability
 
     # Summary Statistics
     st.subheader("Summary Statistics")
