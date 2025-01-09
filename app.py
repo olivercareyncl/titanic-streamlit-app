@@ -23,24 +23,6 @@ def create_fare_groups(df):
     df['Fare Group'] = pd.cut(df['Fare'], bins=bins, labels=labels, right=False)
     return df
 
-# Feature Definitions
-feature_definitions = {
-    'PassengerId': 'Unique ID assigned to each passenger.',
-    'Pclass': 'Passenger class (1 = 1st; 2 = 2nd; 3 = 3rd).',
-    'Name': 'Name of the passenger.',
-    'Sex': 'Gender of the passenger (male, female).',
-    'Age': 'Age of the passenger in years.',
-    'SibSp': 'Number of siblings or spouses aboard the Titanic.',
-    'Parch': 'Number of parents or children aboard the Titanic.',
-    'Ticket': 'Ticket number.',
-    'Fare': 'Fare paid by the passenger.',
-    'Cabin': 'Cabin number where the passenger stayed.',
-    'Embarked': 'Port of embarkation (C = Cherbourg; Q = Queenstown; S = Southampton).',
-    'Survived': 'Survival status (0 = No; 1 = Yes).',
-    'Age Group': 'Categorized age group (Infant, Child, Teen, Adult, Senior, Elderly).',
-    'Fare Group': 'Categorized fare group (Low Fare, Medium Fare, High Fare, Very High Fare).'
-}
-
 # Enhanced Data Overview
 def data_overview(df):
     st.header("Data Overview")
@@ -62,6 +44,24 @@ def data_overview(df):
         'Data Type': df.dtypes
     })
     st.write(data_types)
+
+    # Feature Definitions
+feature_definitions = {
+    'PassengerId': 'Unique ID assigned to each passenger.',
+    'Pclass': 'Passenger class (1 = 1st; 2 = 2nd; 3 = 3rd).',
+    'Name': 'Name of the passenger.',
+    'Sex': 'Gender of the passenger (male, female).',
+    'Age': 'Age of the passenger in years.',
+    'SibSp': 'Number of siblings or spouses aboard the Titanic.',
+    'Parch': 'Number of parents or children aboard the Titanic.',
+    'Ticket': 'Ticket number.',
+    'Fare': 'Fare paid by the passenger.',
+    'Cabin': 'Cabin number where the passenger stayed.',
+    'Embarked': 'Port of embarkation (C = Cherbourg; Q = Queenstown; S = Southampton).',
+    'Survived': 'Survival status (0 = No; 1 = Yes).',
+    'Age Group': 'Categorized age group (Infant, Child, Teen, Adult, Senior, Elderly).',
+    'Fare Group': 'Categorized fare group (Low Fare, Medium Fare, High Fare, Very High Fare).'
+}
 
     # Section 2: Feature Definitions
     st.subheader("Feature Definitions")
@@ -99,6 +99,54 @@ def data_overview(df):
     st.subheader("Summary Statistics")
     st.write(df.describe())
 
+def survival_analysis(df):
+    st.header("Survival Analysis")
+    
+    st.write("""
+        In this section, we will investigate how different features or combinations of features affect the survival rate of passengers. 
+        The goal is to understand which factors had the most influence on whether a passenger survived or not.
+    """)
+
+    # Exclude 'PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin' from the dropdown options
+    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin', 'Age', 'Fare']]
+
+    # Create Age and Fare groups
+    df = create_age_groups(df)
+    df = create_fare_groups(df)
+
+    # Add the new columns (Age Group and Fare Group) to available columns for the dropdown
+    available_columns.extend(['Age Group', 'Fare Group'])
+
+    # Select feature or combination of features to analyze
+    feature_column = st.selectbox("Select Feature to Analyze Against Survival", available_columns)
+
+    if feature_column:
+        # Plotting survival rate based on selected feature
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.barplot(x=feature_column, y='Survived', data=df, ax=ax, palette="muted")
+        ax.set_title(f'Survival Rate by {feature_column}')
+        st.pyplot(fig)
+
+    # Investigating combinations of features
+    st.subheader("Survival Rate by Feature Combinations")
+    
+    feature1 = st.selectbox("Select First Feature", available_columns)
+    feature2 = st.selectbox("Select Second Feature", available_columns)
+
+    if feature1 and feature2:
+        # Cross-tabulation for combinations of features (counts)
+        contingency_table = pd.crosstab(df[feature1], df[feature2], df['Survived'], aggfunc='mean').fillna(0)
+        count_table = pd.crosstab(df[feature1], df[feature2])  # Counts of passengers for each combination
+
+        st.write("Passenger Count for Each Combination:")
+        st.write(count_table)  # Show count of passengers for each combination
+
+        # Visualize survival rate by combination
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.heatmap(contingency_table, annot=True, cmap="coolwarm", fmt='.2f', ax=ax)
+        ax.set_title(f'Survival Rate by {feature1} and {feature2}')
+        st.pyplot(fig)
+
 def main():
     st.title("Titanic Survival Prediction App")
 
@@ -129,6 +177,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
