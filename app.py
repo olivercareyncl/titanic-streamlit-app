@@ -9,6 +9,20 @@ def load_data():
     train_df = pd.read_csv('train.csv')
     return train_df
 
+# Create Age Groups
+def create_age_groups(df):
+    bins = [0, 12, 18, 35, 60, 100]
+    labels = ['Child', 'Teen', 'Adult', 'Senior', 'Elderly']
+    df['Age Group'] = pd.cut(df['Age'], bins=bins, labels=labels)
+    return df
+
+# Create Fare Groups
+def create_fare_groups(df):
+    bins = [0, 7.91, 14.454, 31, 513]  # These bins are chosen based on the distribution of the 'Fare' column
+    labels = ['Low', 'Medium', 'High', 'Very High']
+    df['Fare Group'] = pd.cut(df['Fare'], bins=bins, labels=labels)
+    return df
+
 # Enhanced Data Overview
 def data_overview(df):
     st.header("Data Overview")
@@ -70,8 +84,12 @@ def survival_analysis(df):
         The goal is to understand which factors had the most influence on whether a passenger survived or not.
     """)
 
-    # Exclude 'PassengerId', 'Survived', 'Name' from the dropdown options
-    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name']]
+    # Exclude 'PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin' from the dropdown options
+    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin']]
+
+    # Create Age and Fare groups
+    df = create_age_groups(df)
+    df = create_fare_groups(df)
 
     # Select feature or combination of features to analyze
     feature_column = st.selectbox("Select Feature to Analyze Against Survival", available_columns)
@@ -129,7 +147,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
 
