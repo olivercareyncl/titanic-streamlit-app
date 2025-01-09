@@ -136,6 +136,10 @@ def predicting_survival(train_df, test_df):
     df = create_fare_groups(df)
     df = encode_categorical_columns(df)
 
+    # Handle missing values
+    imputer = SimpleImputer(strategy='mean')
+    df[['Age', 'Fare']] = imputer.fit_transform(df[['Age', 'Fare']])
+
     # Define features and target variable
     X = df.drop(columns=['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin'])
     y = df['Survived']
@@ -190,6 +194,7 @@ def predicting_survival(train_df, test_df):
         test_data = create_age_groups(test_data)
         test_data = create_fare_groups(test_data)
         test_data = encode_categorical_columns(test_data)
+        test_data[['Age', 'Fare']] = imputer.transform(test_data[['Age', 'Fare']])  # Ensure test data has the same preprocessing
         X_test_data = test_data.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'])
         
         test_predictions = model.predict(X_test_data)
@@ -210,11 +215,10 @@ def main():
         data_overview(train_df)
 
     elif tab == "Survival Analysis":
-        survival_analysis(train_df)
+        survival_analysis(train_df)  # Ensure you have this function defined, if needed
 
     elif tab == "Predicting Survival":
         predicting_survival(train_df, test_df)
 
 if __name__ == "__main__":
     main()
-
