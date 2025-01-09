@@ -28,9 +28,11 @@ def data_overview(df):
     else:
         st.write("No missing data")
     
-    # Comment: Excluding rows with missing values for correlation calculation
-    # We will not fill the missing values, but we exclude rows with missing numerical data for the correlation heatmap.
-    df_no_missing = df.dropna(subset=['Age', 'Fare'])  # Only drop rows with missing 'Age' or 'Fare'
+    # Fill missing values for numerical columns with the median or mean
+    df['Age'].fillna(df['Age'].median(), inplace=True)  # Filling missing Age with the median
+    df['Fare'].fillna(df['Fare'].median(), inplace=True)  # Filling missing Fare with the median
+    df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)  # Filling missing Embarked with the mode
+    df['Cabin'].fillna('Unknown', inplace=True)  # Filling missing Cabin with 'Unknown'
 
     # Column Information (Meta-data)
     st.subheader("Column Information")
@@ -45,13 +47,6 @@ def data_overview(df):
     # Summary Statistics
     st.subheader("Summary Statistics")
     st.write(df.describe())
-
-    # Interactive Correlation Heatmap
-    st.subheader("Correlation Heatmap")
-    corr = df_no_missing.corr()  # Calculate correlation only on rows with no missing values
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=ax)
-    st.pyplot(fig)
 
     # Boxplot for 'Age' and 'Fare'
     st.subheader("Boxplots for 'Age' and 'Fare'")
