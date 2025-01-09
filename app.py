@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 
 # Function to load the dataset
@@ -27,6 +28,20 @@ def create_fare_groups(df):
     bins = [0, 7.91, 14.45, 31, 512]  # 0th, 25th, 50th, 75th percentiles, max
     labels = ['Low Fare', 'Medium Fare', 'High Fare', 'Very High Fare']
     df['Fare Group'] = pd.cut(df['Fare'], bins=bins, labels=labels, right=False)
+    return df
+
+# Function to encode categorical variables
+def encode_categorical_columns(df):
+    # Encoding 'Sex' column as it contains two categories
+    le = LabelEncoder()
+    df['Sex'] = le.fit_transform(df['Sex'])
+    
+    # One-Hot Encoding for 'Embarked' column (3 categories)
+    df = pd.get_dummies(df, columns=['Embarked'], drop_first=True)
+    
+    # Encode 'Age Group' and 'Fare Group' as they are already categorical
+    df = pd.get_dummies(df, columns=['Age Group', 'Fare Group'], drop_first=True)
+    
     return df
 
 # Enhanced Data Overview
@@ -105,55 +120,6 @@ def data_overview(df):
     st.subheader("Summary Statistics")
     st.write(df.describe())
 
-# Survival Analysis
-def survival_analysis(df):
-    st.header("Survival Analysis")
-    
-    st.write("""
-        In this section, we will investigate how different features or combinations of features affect the survival rate of passengers. 
-        The goal is to understand which factors had the most influence on whether a passenger survived or not.
-    """)
-
-    # Exclude 'PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin' from the dropdown options
-    available_columns = [col for col in df.columns if col not in ['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin', 'Age', 'Fare']]
-
-    # Create Age and Fare groups
-    df = create_age_groups(df)
-    df = create_fare_groups(df)
-
-    # Add the new columns (Age Group and Fare Group) to available columns for the dropdown
-    available_columns.extend(['Age Group', 'Fare Group'])
-
-    # Select feature or combination of features to analyze
-    feature_column = st.selectbox("Select Feature to Analyze Against Survival", available_columns)
-
-    if feature_column:
-        # Plotting survival rate based on selected feature
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.barplot(x=feature_column, y='Survived', data=df, ax=ax, palette="muted")
-        ax.set_title(f'Survival Rate by {feature_column}')
-        st.pyplot(fig)
-
-    # Investigating combinations of features
-    st.subheader("Survival Rate by Feature Combinations")
-    
-    feature1 = st.selectbox("Select First Feature", available_columns)
-    feature2 = st.selectbox("Select Second Feature", available_columns)
-
-    if feature1 and feature2:
-        # Cross-tabulation for combinations of features (counts)
-        contingency_table = pd.crosstab(df[feature1], df[feature2], df['Survived'], aggfunc='mean').fillna(0)
-        count_table = pd.crosstab(df[feature1], df[feature2])  # Counts of passengers for each combination
-
-        st.write("Passenger Count for Each Combination:")
-        st.write(count_table)  # Show count of passengers for each combination
-
-        # Visualize survival rate by combination
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.heatmap(contingency_table, annot=True, cmap="coolwarm", fmt='.2f', ax=ax)
-        ax.set_title(f'Survival Rate by {feature1} and {feature2}')
-        st.pyplot(fig)
-
 # Predicting Survival
 def predicting_survival(train_df, test_df):
     st.header("Predicting Survival")
@@ -168,6 +134,7 @@ def predicting_survival(train_df, test_df):
     df = train_df.copy()
     df = create_age_groups(df)
     df = create_fare_groups(df)
+    df = encode_categorical_columns(df)
 
     # Define features and target variable
     X = df.drop(columns=['PassengerId', 'Survived', 'Name', 'Ticket', 'Cabin'])
@@ -226,6 +193,7 @@ def predicting_survival(train_df, test_df):
         test_data = test_df.copy()
         test_data = create_age_groups(test_data)
         test_data = create_fare_groups(test_data)
+        test_data = encode_categorical_columns(test_data)
         X_test_data = test_data.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'])
         
         test_predictions = model.predict(X_test_data)
@@ -253,3 +221,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
